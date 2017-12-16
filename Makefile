@@ -10,4 +10,7 @@ test:
 serve:
 	PYTHONPATH=. python orion/server.py
 
+init-db:
+	PYTHONPATH=. python orion/scripts/db_init.py
+
 .PHONY: bootstrap lint test

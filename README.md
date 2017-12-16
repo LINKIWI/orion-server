@@ -52,6 +52,8 @@ $ cd orion-server
 $ virtualenv env
 $ source env/bin/activate
 $ make bootstrap
+# Create the initial database tables
+$ make init-db
 ```
 
 Add an Apache virtual host:
@@ -70,6 +72,7 @@ Add an Apache virtual host:
     # This is important; otherwise Orion will allow any user
     <Location /api>
         AuthType basic
+        AuthName "Orion"
         AuthBasicProvider file
         AuthUserFile /etc/apache2/.htpasswd
         Require user ...
