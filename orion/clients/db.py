@@ -1,3 +1,5 @@
+import os
+
 from flask_sqlalchemy import SQLAlchemy
 
 session_opts = {
@@ -16,10 +18,10 @@ def DbClient(app, database_config):
     :return: A SQLAlchemy object for interacting with the database.
     """
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{user}:{password}@{host}/{name}'.format(
-        user=database_config['user'],
-        password=database_config['password'],
-        host=database_config['host'],
-        name=database_config['name'],
+        user=os.environ.get('DATABASE_USER', database_config['user']),
+        password=os.environ.get('DATABASE_PASSWORD', database_config['password']),
+        host=os.environ.get('DATABASE_HOST', database_config['host']),
+        name=os.environ.get('DATABASE_NAME', database_config['name']),
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
