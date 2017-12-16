@@ -1,0 +1,8 @@
+{
+  "database": {
+    "host": "localhost",
+    "name": "orion",
+    "user": "orion",
+    "password": "orion"
+  }
+}

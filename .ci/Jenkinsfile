@@ -1,0 +1,35 @@
+pipeline {
+    agent {
+        dockerfile {
+            dir '.ci'
+        }
+    }
+
+    stages {
+        stage('Install') {
+            steps {
+                sh 'sudo make bootstrap'
+            }
+        }
+        stage('Test') {
+            parallel {
+                stage('Lint') {
+                    steps {
+                        sh 'make lint'
+                    }
+                }
+                stage('Unit') {
+                    steps {
+                        sh 'make test'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            deleteDir()
+        }
+    }
+}
