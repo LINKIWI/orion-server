@@ -1,6 +1,6 @@
 import os
 
-from flask_sqlalchemy import SQLAlchemy
+import flask_sqlalchemy
 
 session_opts = {
     'expire_on_commit': False,
@@ -25,4 +25,4 @@ def DbClient(app, database_config):
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    return SQLAlchemy(app, session_options=session_opts)
+    return flask_sqlalchemy.SQLAlchemy(app, session_options=session_opts)
