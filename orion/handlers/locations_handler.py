@@ -10,7 +10,7 @@ from orion.util.request import require_params
 NUM_SEC_MONTH = 31 * 24 * 3600
 
 
-class QueryHandler(BaseHandler):
+class LocationsHandler(BaseHandler):
     """
     Query location data reported for a user and device.
 
@@ -26,7 +26,7 @@ class QueryHandler(BaseHandler):
     """
 
     methods = ['POST']
-    path = '/api/query'
+    path = '/api/locations'
 
     @require_params('user', 'device')
     def run(self, *args, **kwargs):
