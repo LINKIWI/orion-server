@@ -35,6 +35,7 @@ Create a configuration file `/etc/orion/config.json` of the following shape:
 {
   "database": {
     "host": "localhost",
+    "port": 3306,
     "name": "orion",
     "user": "orion",
     "password": "super-secret-password"
