@@ -35,7 +35,10 @@ class LocationsHandler(BaseHandler):
         timestamp_start = self.data.get('timestamp_start', int(time.time()) - NUM_SEC_MONTH)
         timestamp_end = self.data.get('timestamp_end', int(time.time()))
 
-        locations = self.ctx.db.session.query(Location).filter(
+        locations = self.ctx.db.session.query(Location).filter_by(
+            user=self.data['user'],
+            device=self.data['device'],
+        ).filter(
             and_(Location.timestamp > timestamp_start, Location.timestamp < timestamp_end)
         ).offset(
             offset
