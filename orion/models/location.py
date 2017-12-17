@@ -26,7 +26,7 @@ class Location(BaseModel):
     battery = Column(Integer, default=None)
     trigger = Column(String(1), default=None)
     connection = Column(String(1), default=None)
-    tracker_id = Column(String(256), default=None)
+    tracker_id = Column(String(2), default=None)
 
     def __init__(
         self,
