@@ -2,11 +2,13 @@
 
 ## What is Orion?
 
-Orion is a (mostly) drop-in replacement for the server-side [OwnTracks Recorder](https://github.com/owntracks/recorder) for clients reporting locations via HTTP. Orion recognizes and respects the [client JSON payload format](http://owntracks.org/booklet/tech/json/) shipped by the OwnTracks Android client.
+Orion is a (mostly) drop-in replacement for [OwnTracks Recorder](https://github.com/owntracks/recorder) for clients reporting locations via HTTP. Orion recognizes and respects the [client JSON payload format](http://owntracks.org/booklet/tech/json/) shipped by the OwnTracks Android client.
 
-But why? The official OwnTracks Recorder is needlessly complicated and difficult to set up. For simple and straightforward deployments where clients report location with periodic HTTP requests, all the server needs to do is parse that client payload and persist it somewhere in a database. That's what this project is for.
+**But why?** The official OwnTracks Recorder is, in my opinion, needlessly complicated and difficult to set up. For simple and straightforward deployments where clients report location with periodic HTTP requests, all the server needs to do is parse that client payload and persist it somewhere in a database. That's what this project is for.
 
-What about the name? I'm not really sure, I just needed a name to create a repository. There's probably something to be said about constellations and stars and how stars are related to your location, or something.
+`orion-server` pairs nicely with [`orion-web`](https://github.com/LINKIWI/orion-web), a frontend visualization tool for the web similar to that supplied by the official OwnTracks recorder. Deploying the web interface alongside the server is of course optional if you don't need it.
+
+Why "Orion"? I'm not really sure. There's probably something to be said about constellations and stars and how stars are related to your location, or something.
 
 ## Features
 
@@ -16,7 +18,39 @@ Note that **an authentication mechanism is deliberately excluded from Orion itse
 
 Orion does *not* support or respect other types of requests, and has no support for MQTT.
 
-## Installation and configuration
+## Configuration
+
+You have the option of supplying all necessary configuration variables in a JSON file, passed as environment variables to the server process, or some combination thereof. *Note that the value of an environment variable will override the value specified in the JSON config file in the event of a conflict.*
+
+By default, Orion will look for a config file at `/etc/orion/config.json`. You can override this by passing environment variable `ORION_CONFIG=/path/to/config.json`.
+
+Orion respects the following configuration parameters (note that some are required to be defined before starting the server):
+
+|JSON config file key|Equivalent environment variable|Required?|Description|Example|
+|-|-|-|-|-|
+|`database.host`|`DATABASE_HOST`|Yes|Hostname of the MySQL database used for storage.|`localhost`|
+|`database.port`|`DATABASE_PORT`|Yes|Port of the MySQL database used for storage.|`3306`|
+|`database.name`|`DATABASE_NAME`|Yes|Name of the MySQL database used for storage.|`orion`|
+|`database.user`|`DATABASE_USER`|Yes|Username of the MySQL user.|`orion`|
+|`database.password`|`DATABASE_PASSWORD`|Yes|Password of the MySQL user.|`super-secret-password`|
+|`frontend_url`|`FRONTEND_URL`|No|The fully-qualified base URL of the [`orion-web`](https://github.com/LINKIWI/orion-web) frontend interface. Used for settings CORS headers. You should omit this configuration parameter if (1) you're not using `orion-web`, *or* (2) `orion-web` is deployed to the same base URL as `orion-server`.|`http://orion.example.com`|
+
+An example valid `config.json` might look something like this:
+
+```js
+{
+  "database": {
+    "host": "localhost",
+    "port": 3306,
+    "name": "orion",
+    "user": "orion",
+    "password": "super-secret-password"
+  },
+  "frontend_url": "http://orion.example.com"
+}
+```
+
+## Installation
 
 You'll need a WSGI-friendly web server, Python, pip, the `virtualenv` package, and a SQLAlchemy-friendly database. The instructions below assume locally-hosted MySQL and Apache.
 
@@ -29,25 +63,10 @@ GRANT ALL ON orion.* TO 'orion'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-Create a configuration file `/etc/orion/config.json` of the following shape:
-
-```js
-{
-  "database": {
-    "host": "localhost",
-    "port": 3306,
-    "name": "orion",
-    "user": "orion",
-    "password": "super-secret-password"
-  }
-}
-```
-
-Get the source code:
+Get the source code and bootstrap the application:
 
 ```bash
-# Pull source code
-$ git clone git@git.kevinlin.info:personal/orion-server.git
+$ git clone https://github.com/LINKIWI/orion-server.git
 $ cd orion-server
 # Install Python dependencies
 $ virtualenv env
@@ -61,7 +80,7 @@ Add an Apache virtual host:
 
 ```apache
 <VirtualHost *:80>
-    ServerName ...
+    ServerName orion.example.com
 
     WSGIScriptAlias / /path/to/orion-server/orion.wsgi
 
@@ -70,8 +89,8 @@ Add an Apache virtual host:
     </Directory>
 
     # Handle user authentication at the web server level
-    # This is important; otherwise Orion will allow any user
-    <Location /api>
+    # This is important; otherwise Orion will allow any user to publish location events
+    <Location /api/publish>
         AuthType basic
         AuthName "Orion"
         AuthBasicProvider file
@@ -86,6 +105,24 @@ Add an Apache virtual host:
 Assuming the above virtual host configuration, the Android OwnTracks client application can be configured as follows:
 
 1. Set the mode to `Private HTTP`
-2. Set the host to `http://<your server name>/api/publish`
+2. Set the host to `http://orion.example.com/api/publish`
 3. Enable authentication with the username/password respected in `/etc/apache2/.htpasswd`
 4. Set the device ID (required) and tracker ID (optional)
+
+## FAQ
+
+#### iOS support
+
+iOS ships a JSON payload that is more or less of the same shape as that of the Android client, so it should be compatible without any additional action.
+
+#### Support for other OwnTracks features
+
+The only feature I use is periodic background location reporting, so adding support to Orion to respect payloads sent by other features is not a high priority, but may be investigated in the future.
+
+#### Support for MQTT
+
+Sorry, this is not planned. To keep the server simple and friendly for small-scale deployments, only HTTP is supported.
+
+#### Docker
+
+It is *highly recommended* to follow the above instructions for installing Orion manually. However, you can try [`orion-docker`](https://github.com/LINKIWI/orion-docker) for a "one-click" Docker deployment solution, though stability is not guaranteed.
