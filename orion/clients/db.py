@@ -1,5 +1,3 @@
-import os
-
 import flask_sqlalchemy
 
 session_opts = {
@@ -7,22 +5,26 @@ session_opts = {
 }
 
 
-def DbClient(app, database_config):
+def DbClient(app, user, password, host, port, name):
     """
     Orion does not need to provide any addition abstractions over the client object created by
     SQLAlchemy. This function directly returns the object instantiated by creating a SQLAlchemy
     object from the current Flask app.
 
     :param app: Flask application object.
-    :param database_config: Dictionary describing the database configuration details.
+    :param user: The username of the MySQL user.
+    :param password: The password of the MySQL user.
+    :param host: The host of the MySQL instance.
+    :param port: The port of the MySQL instance.
+    :param name: The name of the MySQL database.
     :return: A SQLAlchemy object for interacting with the database.
     """
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{user}:{password}@{host}:{port}/{name}'.format(
-        user=os.environ.get('DATABASE_USER', database_config['user']),
-        password=os.environ.get('DATABASE_PASSWORD', database_config['password']),
-        host=os.environ.get('DATABASE_HOST', database_config['host']),
-        port=os.environ.get('DATABASE_PORT', database_config['port']),
-        name=os.environ.get('DATABASE_NAME', database_config['name']),
+        user=user,
+        password=password,
+        host=host,
+        port=port,
+        name=name,
     )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

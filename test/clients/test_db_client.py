@@ -19,7 +19,14 @@ class TestDbClient(TestCase):
 
     @mock.patch.object(flask_sqlalchemy, 'SQLAlchemy', return_value=5)
     def test_sqlalchemy(self, mock_sqlalchemy):
-        instance = DbClient(self.mock_app, self.mock_database_config)
+        instance = DbClient(
+            self.mock_app,
+            user=self.mock_database_config['user'],
+            password=self.mock_database_config['password'],
+            host=self.mock_database_config['host'],
+            port=self.mock_database_config['port'],
+            name=self.mock_database_config['name'],
+        )
         (app,), kwargs = mock_sqlalchemy.call_args
 
         self.assertEqual(instance, 5)

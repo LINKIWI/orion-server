@@ -14,4 +14,11 @@ class Context(object):
         :param app: Flask application instance.
         """
         self.config = ConfigClient()
-        self.db = DbClient(app, self.config.get_value('database'))
+        self.db = DbClient(
+            app,
+            user=self.config.get_value('database.user'),
+            password=self.config.get_value('database.password'),
+            host=self.config.get_value('database.host'),
+            port=self.config.get_value('database.port'),
+            name=self.config.get_value('database.name'),
+        )
