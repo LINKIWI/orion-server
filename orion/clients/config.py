@@ -12,7 +12,7 @@ def _get_recursive_config_key(config, key):
     :param key: List of nested keys (in-order) for which the value should be retrieved.
     :return: The value in the configuration dictionary corresponding to the nested key.
     """
-    return _get_recursive_config_key(config.get(key[0]), key[1:]) if len(key) else config
+    return _get_recursive_config_key((config or {}).get(key[0]), key[1:]) if len(key) else config
 
 
 def _parse_config_json(path):
@@ -96,6 +96,8 @@ class ConfigClient(object):
             # At least one required param is not defined in the environment; read the config file on
             # disk and hope that it's defined there
             self.config = _parse_config_json(os.environ.get('ORION_CONFIG', path))
+        else:
+            self.config = None
 
     def get_value(self, key):
         """

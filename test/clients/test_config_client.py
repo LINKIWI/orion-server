@@ -95,6 +95,7 @@ class TestConfigClient(TestCase):
         self.assertEqual(instance.get_value('database.name'), 'env_orion')
         self.assertEqual(instance.get_value('database.user'), 'env_orion')
         self.assertEqual(instance.get_value('database.password'), 'env_password')
+        self.assertEqual(instance.get_value('frontend_url'), '*')
 
     @mock.patch(
         '__builtin__.open'.format(__name__),
