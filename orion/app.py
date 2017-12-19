@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import jsonify
 from flask import request
+from flask_cors import CORS
 
 from orion.context import Context
 from orion.handlers import handler_classes
@@ -15,6 +16,7 @@ def init_app(app):
     :return: Server-side application context.
     """
     ctx = Context(app)
+    CORS(app, supports_credentials=True, origins=[ctx.config.get_value('frontend_url')])
 
     def map_handler_func(HandlerClass):
         """

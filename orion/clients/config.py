@@ -31,7 +31,7 @@ class ConfigParam(object):
     Describes an available configuration parameter.
     """
 
-    def __init__(self, key, default='', required=True, transform=lambda val: val):
+    def __init__(self, key, default=None, required=True, transform=lambda val: val):
         """
         Create a configuration parameter definition.
 
@@ -76,7 +76,7 @@ class ConfigClient(object):
         'database.name': ConfigParam('DATABASE_NAME', required=True, transform=str),
         'database.user': ConfigParam('DATABASE_USER', required=True, transform=str),
         'database.password': ConfigParam('DATABASE_PASSWORD', required=True, transform=str),
-        'frontend_url': ConfigParam('FRONTEND_URL', required=False, transform=str),
+        'frontend_url': ConfigParam('FRONTEND_URL', default='*', required=False, transform=str),
     }
 
     def __init__(self, path=DEFAULT_CONFIG_PATH):

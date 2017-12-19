@@ -147,4 +147,4 @@ class TestConfigClient(TestCase):
     def test_get_value_default(self):
         instance = ConfigClient()
 
-        self.assertEqual(instance.get_value('frontend_url'), '')
+        self.assertEqual(instance.get_value('frontend_url'), '*')
