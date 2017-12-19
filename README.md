@@ -1,3 +1,5 @@
+![Orion](https://static.kevinlin.info/orion-banner.png)
+
 # orion-server
 
 ## What is Orion?
