@@ -149,3 +149,4 @@ class TestConfigClient(TestCase):
         instance = ConfigClient()
 
         self.assertEqual(instance.get_value('frontend_url'), '*')
+        self.assertIsNone(instance.get_value('sentry_dsn'))

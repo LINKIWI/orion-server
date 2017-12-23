@@ -120,8 +120,12 @@ class ConfigClient(object):
         # 1. The value of the config key as defined in the environment
         # 2. The value of the config key as defined in the config file
         # 3. The default value specified in the config param definition
-        return config_param.transform(
+        defined_config_value = (
             (config_param.is_env_value_defined() and config_param.get_env_value()) or
-            _get_recursive_config_key(self.config, key.split('.')) or
-            config_param.default
+            _get_recursive_config_key(self.config, key.split('.'))
         )
+
+        if defined_config_value:
+            return config_param.transform(defined_config_value)
+
+        return config_param.default
