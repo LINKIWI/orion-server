@@ -77,6 +77,7 @@ class ConfigClient(object):
         'database.user': ConfigParam('DATABASE_USER', required=True, transform=str),
         'database.password': ConfigParam('DATABASE_PASSWORD', required=True, transform=str),
         'frontend_url': ConfigParam('FRONTEND_URL', default='*', required=False, transform=str),
+        'sentry_dsn': ConfigParam('SENTRY_DSN', required=False, transform=str),
     }
 
     def __init__(self, path=DEFAULT_CONFIG_PATH):
