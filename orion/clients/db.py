@@ -7,7 +7,7 @@ session_opts = {
 
 def DbClient(app, user, password, host, port, name):
     """
-    Orion does not need to provide any addition abstractions over the client object created by
+    Orion does not need to provide any additional abstractions over the client object created by
     SQLAlchemy. This function directly returns the object instantiated by creating a SQLAlchemy
     object from the current Flask app.
 
