@@ -1,4 +1,4 @@
-FROM jenkins:v0.0.5
+FROM docker.internal.kevinlin.info/infra/ci-base:0.0.5
 
 RUN apt-get install -y python-dev libmysqlclient-dev
 
