@@ -70,6 +70,8 @@ Get the source code and bootstrap the application:
 ```bash
 $ git clone https://github.com/LINKIWI/orion-server.git
 $ cd orion-server
+# Install system dependencies
+$ sudo apt-get install libmysqlclient-dev python-dev
 # Install Python dependencies
 $ virtualenv env
 $ source env/bin/activate
