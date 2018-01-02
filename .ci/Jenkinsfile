@@ -2,6 +2,7 @@ pipeline {
     agent {
         dockerfile {
             dir '.ci'
+            label 'docker-executor'
         }
     }
 
@@ -24,12 +25,6 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            deleteDir()
         }
     }
 }
