@@ -1,5 +1,6 @@
 from orion.clients.config import ConfigClient
 from orion.clients.db import DbClient
+from orion.clients.geocode import ReverseGeocodingClient
 
 
 class Context(object):
@@ -21,4 +22,7 @@ class Context(object):
             host=self.config.get_value('database.host'),
             port=self.config.get_value('database.port'),
             name=self.config.get_value('database.name'),
+        )
+        self.geocode = ReverseGeocodingClient(
+            google_api_key=self.config.get_value('google_api_key'),
         )
