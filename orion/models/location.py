@@ -27,6 +27,7 @@ class Location(BaseModel):
     trigger = Column(String(1), default=None)
     connection = Column(String(1), default=None)
     tracker_id = Column(String(2), default=None)
+    address = Column(String(256), default=None)
 
     def __init__(
         self,
@@ -40,6 +41,7 @@ class Location(BaseModel):
         trigger,
         connection,
         tracker_id,
+        address,
     ):
         """
         Create a location report entry.
@@ -55,6 +57,7 @@ class Location(BaseModel):
         :param connection: Single-character code representing the network connection type when the
                            report was created.
         :param tracker_id: Client-specified tracker ID.
+        :param address: Reverse-geocoded address of this coordinate.
         """
         self.timestamp = timestamp
         self.user = user
@@ -66,6 +69,7 @@ class Location(BaseModel):
         self.trigger = trigger
         self.connection = connection
         self.tracker_id = tracker_id
+        self.address = address
 
     def serialize(self, fields=()):
         """
@@ -86,6 +90,7 @@ class Location(BaseModel):
             'battery': self.battery,
             'connection': self.connection,
             'tracker_id': self.tracker_id,
+            'address': self.address,
         }
 
         return {
