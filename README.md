@@ -2,6 +2,9 @@
 
 # orion-server
 
+[![Build Status](https://travis-ci.org/LINKIWI/orion-server.svg?branch=master)](https://travis-ci.org/LINKIWI/orion-server)
+[![Coverage Status](https://coveralls.io/repos/github/LINKIWI/orion-server/badge.svg?branch=master)](https://coveralls.io/github/LINKIWI/orion-server?branch=master)
+
 ## What is Orion?
 
 Orion is a (mostly) drop-in replacement for [OwnTracks Recorder](https://github.com/owntracks/recorder) for clients reporting locations via HTTP. Orion recognizes and respects the [client JSON payload format](http://owntracks.org/booklet/tech/json/) shipped by the OwnTracks Android client.
