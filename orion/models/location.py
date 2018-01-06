@@ -67,13 +67,15 @@ class Location(BaseModel):
         self.connection = connection
         self.tracker_id = tracker_id
 
-    def serialize(self):
+    def serialize(self, fields=()):
         """
         Serialize the model into a JSON payload.
 
+        :param fields: Optional list of fields (keys) to include in the serialization. If empty or
+                       otherwise falsey, all fields are included.
         :return: A JSON payload representing the location entry.
         """
-        return {
+        full_serialization = {
             'location_id': self.location_id,
             'timestamp': self.timestamp,
             'user': self.user,
@@ -84,4 +86,10 @@ class Location(BaseModel):
             'battery': self.battery,
             'connection': self.connection,
             'tracker_id': self.tracker_id,
+        }
+
+        return {
+            key: value
+            for key, value in full_serialization.items()
+            if not fields or key in fields
         }

@@ -34,6 +34,7 @@ class LocationsHandler(BaseHandler):
         limit = self.data.get('limit', 10)
         timestamp_start = self.data.get('timestamp_start', int(time.time()) - NUM_SEC_MONTH)
         timestamp_end = self.data.get('timestamp_end', int(time.time()))
+        fields = self.data.get('fields', [])
 
         locations = self.ctx.db.session.query(Location).filter_by(
             user=self.data['user'],
@@ -47,7 +48,7 @@ class LocationsHandler(BaseHandler):
         ).all()
 
         serialized_locations = [
-            location.serialize()
+            location.serialize(fields)
             for location in locations
         ]
 
