@@ -26,19 +26,24 @@ class PublishHandler(BaseHandler):
         user = request.headers.get('X-Limit-U')
         device = request.headers.get('X-Limit-D')
 
+        lat = self.data.get('lat')
+        lon = self.data.get('lon')
+        address = self.ctx.geocode.reverse_geocode(lat, lon)
+
         location = Location(
             timestamp=self.data.get('tst'),
             user=user,
             device=device,
-            latitude=self.data.get('lat'),
-            longitude=self.data.get('lon'),
+            latitude=lat,
+            longitude=lon,
             accuracy=self.data.get('acc'),
             battery=self.data.get('batt'),
             trigger=self.data.get('t'),
             connection=self.data.get('conn'),
             tracker_id=self.data.get('tid'),
+            address=address,
         )
         self.ctx.db.session.add(location)
         self.ctx.db.session.commit()
 
-        return self.success()
+        return self.success(status=201)
