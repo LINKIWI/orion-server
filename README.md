@@ -17,7 +17,7 @@ Why "Orion"? I'm not really sure. There's probably something to be said about co
 
 ## Features
 
-The scope of responsibility of Orion is deliberately very limited. Orion exposes a handler to save HTTP location reports from the Android OwnTracks client to a database. That's it.
+The scope of responsibility of Orion is deliberately very limited. Orion exposes a handler to save HTTP location reports from the Android OwnTracks client to a database. It also provides an opt-in feature to reverse geocode GPS coordinates into formatted addresses, which are persisted to the database.
 
 Note that **an authentication mechanism is deliberately excluded from Orion itself**. Since the OwnTracks client authenticates requests with a simple Basic `Authorization` HTTP header, Orion delegates the responsibility of user authentication to your web server. This means that by the time a request reaches the Orion service itself, Orion assumes the request has already been authenticated, and will persist the data to a database exactly as-is.
 
@@ -39,6 +39,7 @@ Orion respects the following configuration parameters (note that some are requir
 |`database.user`|`DATABASE_USER`|Yes|Username of the MySQL user.|`orion`|
 |`database.password`|`DATABASE_PASSWORD`|Yes|Password of the MySQL user.|`super-secret-password`|
 |`frontend_url`|`FRONTEND_URL`|No|The fully-qualified base URL of the [`orion-web`](https://github.com/LINKIWI/orion-web) frontend interface. Used for settings CORS headers. You should omit this configuration parameter if (1) you're not using `orion-web`, *or* (2) `orion-web` is deployed to the same base URL as `orion-server`.|`http://orion.example.com`|
+|`google_api_key`|`GOOGLE_API_KEY`|No|Google Maps API key, used for reverse geocoding. If supplied, Orion will attempt to reverse geocode all incoming GPS coordinates; if omitted, Orion will skip reverse geocoding.|`AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`|
 
 An example valid `config.json` might look something like this:
 
@@ -51,7 +52,8 @@ An example valid `config.json` might look something like this:
     "user": "orion",
     "password": "super-secret-password"
   },
-  "frontend_url": "http://orion.example.com"
+  "frontend_url": "http://orion.example.com",
+  "google_api_key": "AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
 ```
 
@@ -106,6 +108,8 @@ Add an Apache virtual host:
     </Location>
 </VirtualHost>
 ```
+
+If you are interested in enabling reverse geocoding of all GPS coordinates sent by mobile clients, [create a Google Maps API key](https://developers.google.com/maps/documentation/geocoding/start#get-a-key), and ensure it is properly set in the configuration options. This will automatically enable reverse geocoding.
 
 ## Client configuration
 
