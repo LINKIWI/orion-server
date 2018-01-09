@@ -8,7 +8,7 @@ class BaseHandler(object):
     # Route recognized by this handler.
     path = None
 
-    def __init__(self, ctx, data):
+    def __init__(self, ctx, data=None):
         """
         Create a handler.
 
