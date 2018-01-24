@@ -2,6 +2,7 @@ from functools import wraps
 
 import googlemaps
 from googlemaps.exceptions import ApiError
+from googlemaps.exceptions import TransportError
 
 
 def graceful_api_failure(func):
@@ -21,7 +22,7 @@ def graceful_api_failure(func):
 
         try:
             return func(self, *args, **kwargs)
-        except ApiError:
+        except (ApiError, TransportError):
             return
 
     return wrapped_func
