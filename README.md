@@ -1,4 +1,4 @@
-![Orion](https://static.kevinlin.info/orion-banner.png)
+![Orion](https://static.kevinlin.info/blog/orion/banner.png)
 
 # orion-server
 
