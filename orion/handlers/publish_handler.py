@@ -23,8 +23,11 @@ class PublishHandler(BaseHandler):
         if self.data['_type'] != 'location':
             return self.error(status=400, message='Not a location publish.')
 
-        user = request.headers.get('X-Limit-U')
-        device = request.headers.get('X-Limit-D')
+        if self.data.get('topic'):
+            _, user, device = self.data.get('topic').split('/')
+        else:
+            user = request.headers.get('X-Limit-U')
+            device = request.headers.get('X-Limit-D')
 
         lat = self.data.get('lat')
         lon = self.data.get('lon')
