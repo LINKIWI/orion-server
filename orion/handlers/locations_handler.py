@@ -40,7 +40,11 @@ class LocationsHandler(BaseHandler):
             user=self.data['user'],
             device=self.data['device'],
         ).filter(
-            and_(Location.timestamp > timestamp_start, Location.timestamp < timestamp_end)
+            # Only enforce filtering parameters if explicitly specified by the client.
+            and_(
+                not timestamp_start or Location.timestamp > timestamp_start,
+                not timestamp_end or Location.timestamp < timestamp_end,
+            )
         ).offset(
             offset
         ).limit(
