@@ -70,7 +70,10 @@ GRANT ALL ON orion.* TO 'orion'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-Get the source code and bootstrap the application:
+Get the source code and bootstrap the application. 
+
+Note that the virtual environment is located in a folder `env` 
+inside the repository root.
 
 ```bash
 $ git clone https://github.com/LINKIWI/orion-server.git
