@@ -78,3 +78,17 @@ class TestPublishHandler(TestCase):
             self.assertEqual(location.latitude, 1.0)
             self.assertEqual(location.longitude, 2.0)
             self.assertEqual(location.address, 'address')
+
+    def test_cmd_report_location(self):
+        mock_data = {
+            '_type': 'cmd',
+            'action': 'reportLocation',
+            'topic': 'owntracks/user/device'
+        }
+
+        with self.mock_app.test_request_context():
+            handler = PublishHandler(ctx=self.mock_ctx, data=mock_data)
+            resp, status = handler.run()
+
+            self.assertTrue(resp['success'])
+            self.assertEqual(status, 200)

@@ -20,6 +20,12 @@ class PublishHandler(BaseHandler):
     path = '/api/publish'
 
     def run(self, *args, **kwargs):
+        # Sometimes the client tries to send a reportLocation cmd. If server
+        # responds with non-200, all further location updates get backed up behind it.
+        # Handle with empty 200 response
+        if self.data['_type'] == 'cmd' and self.data['action'] == 'reportLocation':
+            return self.success(status=200)
+
         if self.data['_type'] != 'location':
             return self.error(status=400, message='Not a location publish.')
 
