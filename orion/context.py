@@ -1,6 +1,7 @@
 from orion.clients.config import ConfigClient
 from orion.clients.db import DbClient
 from orion.clients.geocode import ReverseGeocodingClient
+from orion.clients.stream import StreamClient
 
 
 class Context(object):
@@ -25,4 +26,8 @@ class Context(object):
         )
         self.geocode = ReverseGeocodingClient(
             google_api_key=self.config.get_value('google_api_key'),
+        )
+        self.stream = StreamClient(
+            kafka_addr=self.config.get_value('kafka.addr'),
+            kafka_topic=self.config.get_value('kafka.topic'),
         )

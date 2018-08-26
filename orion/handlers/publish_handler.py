@@ -52,7 +52,10 @@ class PublishHandler(BaseHandler):
             tracker_id=self.data.get('tid'),
             address=address,
         )
+
         self.ctx.db.session.add(location)
         self.ctx.db.session.commit()
+
+        self.ctx.stream.emit_location(location)
 
         return self.success(status=201)

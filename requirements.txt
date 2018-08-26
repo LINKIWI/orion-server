@@ -21,6 +21,7 @@ idna==2.6
 ipaddress==1.0.19
 itsdangerous==0.24
 Jinja2==2.10
+kafka-python==1.4.3
 MarkupSafe==1.0
 mccabe==0.6.1
 mock==2.0.0
