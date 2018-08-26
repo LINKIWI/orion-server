@@ -24,6 +24,10 @@ mock_required_config = {
 
 mock_optional_config = {
     'frontend_url': 'url',
+    'kafka': {
+        'addr': 'localhost:9092',
+        'topic': 'topic',
+    },
 }
 
 
@@ -139,6 +143,8 @@ class TestConfigClient(TestCase):
         instance = ConfigClient()
 
         self.assertEqual(instance.get_value('frontend_url'), 'url')
+        self.assertEqual(instance.get_value('kafka.addr'), 'localhost:9092')
+        self.assertEqual(instance.get_value('kafka.topic'), 'topic')
 
     @mock.patch(
         '__builtin__.open'.format(__name__),

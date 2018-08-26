@@ -38,6 +38,8 @@ Orion respects the following configuration parameters (note that some are requir
 |`database.name`|`DATABASE_NAME`|Yes|Name of the MySQL database used for storage.|`orion`|
 |`database.user`|`DATABASE_USER`|Yes|Username of the MySQL user.|`orion`|
 |`database.password`|`DATABASE_PASSWORD`|Yes|Password of the MySQL user.|`super-secret-password`|
+|`kafka.addr`|`KAFKA_ADDR`|No|Address of a Kafka broker to which location publish events will be mirrored in real-time. If omitted, Orion will skip publishing to Kafka.|`localhost:9092`|
+|`kafka.topic`|`KAFKA_TOPIC`|No|Name of the Kafka topic, relevant only when Kafka publishing is enabled.|`orion`|
 |`frontend_url`|`FRONTEND_URL`|No|The fully-qualified base URL of the [`orion-web`](https://github.com/LINKIWI/orion-web) frontend interface. Used for settings CORS headers. You should omit this configuration parameter if (1) you're not using `orion-web`, *or* (2) `orion-web` is deployed to the same base URL as `orion-server`.|`http://orion.example.com`|
 |`google_api_key`|`GOOGLE_API_KEY`|No|Google Maps API key, used for reverse geocoding. If supplied, Orion will attempt to reverse geocode all incoming GPS coordinates; if omitted, Orion will skip reverse geocoding.|`AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`|
 
@@ -70,9 +72,9 @@ GRANT ALL ON orion.* TO 'orion'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-Get the source code and bootstrap the application. 
+Get the source code and bootstrap the application.
 
-Note that the virtual environment is located in a folder `env` 
+Note that the virtual environment is located in a folder `env`
 inside the repository root.
 
 ```bash
@@ -135,7 +137,9 @@ The only feature I use is periodic background location reporting, so adding supp
 
 #### Support for MQTT
 
-Sorry, this is not planned. To keep the server simple and friendly for small-scale deployments, only HTTP is supported.
+To keep the server simple and friendly for small-scale deployments, only HTTP reporting is supported.
+
+However, Orion has limited support for publishing location events to a Kafka broker for real-time stream processing applications. When a Kafka broker address is specified in configuration, Orion will automatically emit JSON-serialized location messages to Kafka when the server receives a location publish.
 
 #### Docker
 
