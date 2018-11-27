@@ -54,7 +54,7 @@ An example valid `config.json` might look something like this:
     "password": "super-secret-password"
   },
   "frontend_url": "http://orion.example.com",
-  "google_api_key": "AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  "mapbox_access_token": "pk.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
 ```
 
