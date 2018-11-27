@@ -11,7 +11,7 @@ class TestPublishHandler(TestCase):
     def setUp(self):
         self.mock_app = flask.Flask(__name__)
         self.mock_ctx = mock.MagicMock()
-        self.mock_ctx.cache = CacheClient(addr=None)
+        self.mock_ctx.cache = CacheClient(addr=None, prefix='prefix')
 
     def test_metadata(self):
         handler = PublishHandler(ctx=self.mock_ctx)

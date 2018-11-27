@@ -148,13 +148,14 @@ class CacheClient(object):
     Caching abstractions on top of a key value storage system.
     """
 
-    def __init__(self, addr):
+    def __init__(self, addr, prefix):
         """
         Create a cache client with a Redis backend.
 
         :param addr: Address of the Redis cluster.
+        :param prefix: String prefix for all inserted cache keys.
         """
-        self.prefix = 'orion-server'
+        self.prefix = prefix
 
         if addr:
             self.backend = RedisProxyClient(addr)

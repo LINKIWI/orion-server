@@ -87,29 +87,29 @@ class TestCacheClient(TestCase):
     @mock.patch.object(cache, 'MemoryTTLCache')
     @mock.patch.object(cache, 'RedisProxyClient')
     def setUp(self, *args):
-        self.redis_client = CacheClient('localhost:6379')
-        self.memory_client = CacheClient(None)
+        self.redis_client = CacheClient('localhost:6379', 'prefix')
+        self.memory_client = CacheClient(None, 'prefix')
 
     def test_rw_client(self):
         rw_client = self.redis_client.rw_client('namespace', 'key')
 
         rw_client.get()
-        self.redis_client.backend.get.assert_called_with(key='orion-server:namespace:key:')
+        self.redis_client.backend.get.assert_called_with(key='prefix:namespace:key:')
 
         rw_client.set('value', 1000)
         self.redis_client.backend.set.assert_called_with(
-            key='orion-server:namespace:key:',
+            key='prefix:namespace:key:',
             value='value',
             ttl=1000,
         )
 
         rw_client.delete()
-        self.redis_client.backend.delete.assert_called_with(key='orion-server:namespace:key:')
+        self.redis_client.backend.delete.assert_called_with(key='prefix:namespace:key:')
 
     def test_format_key_valid(self):
         self.assertEqual(
             self.redis_client._format_key('namespace', 'key', {'a': 'b', 'c': 4}),
-            'orion-server:namespace:key:a=b&c=4',
+            'prefix:namespace:key:a=b&c=4',
         )
 
     def test_format_key_invalid(self):

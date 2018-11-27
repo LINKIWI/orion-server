@@ -19,6 +19,7 @@ class Context(object):
         self.config = ConfigClient()
         self.cache = CacheClient(
             addr=self.config.get_value('redis.addr'),
+            prefix='orion',
         )
         self.db = DbClient(
             app,
