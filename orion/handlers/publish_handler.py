@@ -1,3 +1,5 @@
+import json
+
 from flask import request
 
 from orion.handlers.base_handler import BaseHandler
@@ -37,7 +39,7 @@ class PublishHandler(BaseHandler):
 
         lat = self.data.get('lat')
         lon = self.data.get('lon')
-        address = self.ctx.geocode.reverse_geocode(lat, lon)
+        address = self._extract_address(lat, lon)
 
         location = Location(
             timestamp=self.data.get('tst'),
@@ -59,3 +61,36 @@ class PublishHandler(BaseHandler):
         self.ctx.stream.emit_location(location)
 
         return self.success(status=201)
+
+    def _extract_address(self, lat, lon):
+        """
+        Extract a reverse geocoded address from a (latitude, longitude) coordinate, fronted by a
+        cache keyed by the coordinate itself.
+
+        :param lat: Latitude of the coordinate.
+        :param lon: Longitude of the coordinate.
+        :return: String representation of the coordinate's address.
+        """
+        def approx_coord(coord):
+            # Reduce the precision of the coordinate for purposes of the cache key, in an effort to
+            # approximately cluster coordinates within a small area to the same reverse-geocoded
+            # address. This helps reduce API QPS to Mapbox, since coordinates within a few meters
+            # of one another will likely resolve to the same address anyway.
+            return int(round(coord / 10e-6))
+
+        cache = self.ctx.cache.rw_client(
+            namespace='publish',
+            key='reverse-geocode-feature',
+            tags={'lat': approx_coord(lat), 'lon': approx_coord(lon)},
+        )
+
+        cached_feature = cache.get()
+        if cached_feature is None:
+            feature = self.ctx.geocode.reverse_geocode(lat, lon)
+            if not feature:
+                return
+
+            cache.set(json.dumps(feature), ttl=24 * 60 * 60 * 1000)  # 24 hour cache TTL
+            return self._extract_address(lat, lon)
+
+        return json.loads(cached_feature).get('place_name')

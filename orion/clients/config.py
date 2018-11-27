@@ -78,8 +78,9 @@ class ConfigClient(object):
         'database.password': ConfigParam('DATABASE_PASSWORD', required=True, transform=str),
         'kafka.addr': ConfigParam('KAFKA_ADDR', required=False, transform=str),
         'kafka.topic': ConfigParam('KAFKA_TOPIC', default='orion', required=False, transform=str),
+        'redis.addr': ConfigParam('REDIS_ADDR', required=False, transform=str),
         'frontend_url': ConfigParam('FRONTEND_URL', default='*', required=False, transform=str),
-        'google_api_key': ConfigParam('GOOGLE_API_KEY', required=False, transform=str),
+        'mapbox_access_token': ConfigParam('MAPBOX_ACCESS_TOKEN', required=False, transform=str),
         'sentry_dsn': ConfigParam('SENTRY_DSN', required=False, transform=str),
     }
 

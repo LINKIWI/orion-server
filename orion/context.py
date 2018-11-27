@@ -1,3 +1,4 @@
+from orion.clients.cache import CacheClient
 from orion.clients.config import ConfigClient
 from orion.clients.db import DbClient
 from orion.clients.geocode import ReverseGeocodingClient
@@ -16,6 +17,9 @@ class Context(object):
         :param app: Flask application instance.
         """
         self.config = ConfigClient()
+        self.cache = CacheClient(
+            addr=self.config.get_value('redis.addr'),
+        )
         self.db = DbClient(
             app,
             user=self.config.get_value('database.user'),
@@ -25,7 +29,7 @@ class Context(object):
             name=self.config.get_value('database.name'),
         )
         self.geocode = ReverseGeocodingClient(
-            google_api_key=self.config.get_value('google_api_key'),
+            mapbox_access_token=self.config.get_value('mapbox_access_token'),
         )
         self.stream = StreamClient(
             kafka_addr=self.config.get_value('kafka.addr'),

@@ -13,8 +13,6 @@ Orion is a (mostly) drop-in replacement for [OwnTracks Recorder](https://github.
 
 `orion-server` pairs nicely with [`orion-web`](https://github.com/LINKIWI/orion-web), a frontend visualization tool for the web similar to that supplied by the official OwnTracks recorder. Deploying the web interface alongside the server is of course optional if you don't need it.
 
-Why "Orion"? I'm not really sure. There's probably something to be said about constellations and stars and how stars are related to your location, or something.
-
 ## Features
 
 The scope of responsibility of Orion is deliberately very limited. Orion exposes a handler to save HTTP location reports from the Android OwnTracks client to a database. It also provides an opt-in feature to reverse geocode GPS coordinates into formatted addresses, which are persisted to the database.
@@ -38,10 +36,11 @@ Orion respects the following configuration parameters (note that some are requir
 |`database.name`|`DATABASE_NAME`|Yes|Name of the MySQL database used for storage.|`orion`|
 |`database.user`|`DATABASE_USER`|Yes|Username of the MySQL user.|`orion`|
 |`database.password`|`DATABASE_PASSWORD`|Yes|Password of the MySQL user.|`super-secret-password`|
+|`redis.addr`|`REDIS_ADDR`|No|Address of a Redis server to enable Redis-based reverse geocode caching. An in-memory cache is used if no address is supplied or if the specified Redis server is unavailable.|`localhost:6379`|
 |`kafka.addr`|`KAFKA_ADDR`|No|Address of a Kafka broker to which location publish events will be mirrored in real-time. If omitted, Orion will skip publishing to Kafka.|`localhost:9092`|
 |`kafka.topic`|`KAFKA_TOPIC`|No|Name of the Kafka topic, relevant only when Kafka publishing is enabled.|`orion`|
 |`frontend_url`|`FRONTEND_URL`|No|The fully-qualified base URL of the [`orion-web`](https://github.com/LINKIWI/orion-web) frontend interface. Used for settings CORS headers. You should omit this configuration parameter if (1) you're not using `orion-web`, *or* (2) `orion-web` is deployed to the same base URL as `orion-server`.|`http://orion.example.com`|
-|`google_api_key`|`GOOGLE_API_KEY`|No|Google Maps API key, used for reverse geocoding. If supplied, Orion will attempt to reverse geocode all incoming GPS coordinates; if omitted, Orion will skip reverse geocoding.|`AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`|
+|`mapbox_access_token`|`MAPBOX_ACCESS_TOKEN`|No|Mapbox access token, used for reverse geocoding. If supplied, Orion will attempt to reverse geocode all incoming GPS coordinates; if omitted, Orion will skip reverse geocoding.|`pk.xxxxxxxxxxxxx`|
 
 An example valid `config.json` might look something like this:
 
@@ -114,7 +113,7 @@ Add an Apache virtual host:
 </VirtualHost>
 ```
 
-If you are interested in enabling reverse geocoding of all GPS coordinates sent by mobile clients, [create a Google Maps API key](https://developers.google.com/maps/documentation/geocoding/start#get-a-key), and ensure it is properly set in the configuration options. This will automatically enable reverse geocoding.
+If you are interested in enabling reverse geocoding of all GPS coordinates sent by mobile clients, [create a Mapbox access token](https://www.mapbox.com/help/how-access-tokens-work/), and ensure it is properly set in the configuration options. This will automatically enable reverse geocoding.
 
 ## Client configuration
 
