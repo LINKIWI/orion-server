@@ -8,7 +8,7 @@ from orion.clients.stream import StreamClient
 from orion.models.location import Location
 
 
-class StreamClientTest(TestCase):
+class TestStreamClient(TestCase):
     def setUp(self):
         self.mock_location = Location(
             timestamp=1,

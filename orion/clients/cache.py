@@ -176,7 +176,10 @@ class CacheClient(object):
         def get_proxy():
             return self.get(namespace, key, tags)
 
-        return CacheKeyRWClient(set_proxy, get_proxy)
+        def delete_proxy():
+            return self.delete(namespace, key, tags)
+
+        return CacheKeyRWClient(set_proxy, get_proxy, delete_proxy)
 
     def get(self, namespace, key, tags={}):
         """
@@ -216,7 +219,9 @@ class CacheClient(object):
         :param key: The key itself.
         :param tags: Optional dictionary of tags to qualify the key.
         """
-        self.backend.delete(self._format_key(namespace, key, tags))
+        self.backend.delete(
+            key=self._format_key(namespace, key, tags),
+        )
 
     def _format_key(self, namespace, key, tags, delimiter=':'):
         """
@@ -257,12 +262,14 @@ class CacheKeyRWClient:
     repeating the same key qualification arguments.
     """
 
-    def __init__(self, set_proxy, get_proxy):
+    def __init__(self, set_proxy, get_proxy, delete_proxy):
         """
         Create a CacheKeyRWClient.
 
         :param set_proxy: Function that proxies the host set() method.
         :param get_proxy: Function that proxies the host get() method.
+        :param delete_proxy: Function that proxies the host delete() method.
         """
         self.set = set_proxy
         self.get = get_proxy
+        self.delete = delete_proxy

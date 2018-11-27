@@ -6,7 +6,7 @@ import mock
 from orion.clients.geocode import ReverseGeocodingClient
 
 
-class ReverseGeocodingClientTest(TestCase):
+class TestReverseGeocodingClient(TestCase):
     def setUp(self):
         self.auth_client = ReverseGeocodingClient('token')
         self.unauth_client = ReverseGeocodingClient()
