@@ -1,47 +1,55 @@
 from unittest import TestCase
 
-import googlemaps
+import requests
 import mock
-from googlemaps.exceptions import ApiError
 
 from orion.clients.geocode import ReverseGeocodingClient
-
-# The Google Maps API client library makes sure that the API key is shaped properly, and all keys
-# start with this prefix
-GOOGLE_API_KEY_PREFIX = 'AIza'
 
 
 class ReverseGeocodingClientTest(TestCase):
     def setUp(self):
-        self.auth_client = ReverseGeocodingClient(GOOGLE_API_KEY_PREFIX)
+        self.auth_client = ReverseGeocodingClient('token')
         self.unauth_client = ReverseGeocodingClient()
 
-    def test_init(self):
-        self.assertIsNotNone(self.auth_client.gmaps_client)
-        self.assertIsNone(self.unauth_client.gmaps_client)
-
-    @mock.patch.object(googlemaps.Client, 'reverse_geocode')
-    def test_reverse_geocode_valid(self, mock_reverse_geocode):
-        mock_reverse_geocode.return_value = [
-            {'formatted_address': 'address'},
-            {'formatted_address': 'less-accurate-address'},
-        ]
-
+    @mock.patch.object(requests, 'get', return_value=mock.MagicMock(
+        status_code=200,
+        json=lambda: {'features': [{'place_name': 'address'}]},
+    ))
+    def test_reverse_geocode_valid(self, mock_request):
         result = self.auth_client.reverse_geocode('lat', 'lon')
 
-        self.assertTrue(mock_reverse_geocode.calledWith('lat', 'lon'))
-        self.assertEqual(result, 'address')
+        mock_request.assert_called_with(
+            url='https://api.mapbox.com/geocoding/v5/mapbox.places/lon,lat.json'
+                '?access_token=token&types=address',
+        )
+        self.assertEqual(result, {'place_name': 'address'})
 
-    @mock.patch.object(googlemaps.Client, 'reverse_geocode')
-    def test_reverse_geocode_no_api_key(self, mock_reverse_geocode):
-        result = self.unauth_client.reverse_geocode('lat', 'lon')
+    @mock.patch.object(requests, 'get', return_value=mock.MagicMock(
+        status_code=200,
+        json=lambda: {'features': []},
+    ))
+    def test_reverse_geocode_no_results(self, mock_request):
+        result = self.auth_client.reverse_geocode('lat', 'lon')
 
-        self.assertFalse(mock_reverse_geocode.called)
+        mock_request.assert_called_with(
+            url='https://api.mapbox.com/geocoding/v5/mapbox.places/lon,lat.json'
+                '?access_token=token&types=address',
+        )
         self.assertIsNone(result)
 
-    @mock.patch.object(googlemaps.Client, 'reverse_geocode', side_effect=ApiError('error'))
-    def test_reverse_geocode_api_failure(self, mock_reverse_geocode):
+    @mock.patch.object(requests, 'get')
+    def test_reverse_geocode_no_access_token(self, mock_request):
+        result = self.unauth_client.reverse_geocode('lat', 'lon')
+
+        self.assertFalse(mock_request.called)
+        self.assertIsNone(result)
+
+    @mock.patch.object(requests, 'get', return_value=mock.MagicMock(status_code=401))
+    def test_reverse_geocode_api_failure(self, mock_request):
         result = self.auth_client.reverse_geocode('lat', 'lon')
 
-        self.assertTrue(mock_reverse_geocode.calledWith('lat', 'lon'))
+        mock_request.assert_called_with(
+            url='https://api.mapbox.com/geocoding/v5/mapbox.places/lon,lat.json'
+                '?access_token=token&types=address',
+        )
         self.assertIsNone(result)

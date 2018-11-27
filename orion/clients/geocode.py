@@ -47,7 +47,8 @@ class ReverseGeocodingClient(object):
         """
         Execute a blocking request to the Mapbox geocoding API.
 
-        :param mode: Geocoding mode/endpoint; for V5, one of 'mapbox.places' or 'mapbox.places-permanent'.
+        :param mode: Geocoding mode/endpoint; for V5, one of 'mapbox.places' or
+                     'mapbox.places-permanent'.
         :param query: Geocoding query to perform, as a string.
         :param params: Dictionary of parameters to the endpoint.
         """

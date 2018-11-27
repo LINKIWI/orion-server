@@ -3,6 +3,7 @@ from unittest import TestCase
 import flask
 import mock
 
+from orion.clients.cache import CacheClient
 from orion.handlers.publish_handler import PublishHandler
 
 
@@ -10,6 +11,7 @@ class TestPublishHandler(TestCase):
     def setUp(self):
         self.mock_app = flask.Flask(__name__)
         self.mock_ctx = mock.MagicMock()
+        self.mock_ctx.cache = CacheClient(addr=None)
 
     def test_metadata(self):
         handler = PublishHandler(ctx=self.mock_ctx)
@@ -37,7 +39,7 @@ class TestPublishHandler(TestCase):
             'lon': 2.0,
         }
 
-        self.mock_ctx.geocode.reverse_geocode.return_value = 'address'
+        self.mock_ctx.geocode.reverse_geocode.return_value = {'place_name': 'address'}
 
         with self.mock_app.test_request_context(headers=mock_headers):
             handler = PublishHandler(ctx=self.mock_ctx, data=mock_data)
@@ -62,7 +64,7 @@ class TestPublishHandler(TestCase):
             'topic': 'owntracks/user/device'
         }
 
-        self.mock_ctx.geocode.reverse_geocode.return_value = 'address'
+        self.mock_ctx.geocode.reverse_geocode.return_value = {'place_name': 'address'}
 
         with self.mock_app.test_request_context():
             handler = PublishHandler(ctx=self.mock_ctx, data=mock_data)
@@ -78,6 +80,31 @@ class TestPublishHandler(TestCase):
             self.assertEqual(location.latitude, 1.0)
             self.assertEqual(location.longitude, 2.0)
             self.assertEqual(location.address, 'address')
+
+    def test_location_report_reverse_geocode_failure(self):
+        mock_data = {
+            '_type': 'location',
+            'lat': 1.0,
+            'lon': 2.0,
+            'topic': 'owntracks/user/device'
+        }
+
+        self.mock_ctx.geocode.reverse_geocode.return_value = None
+
+        with self.mock_app.test_request_context():
+            handler = PublishHandler(ctx=self.mock_ctx, data=mock_data)
+            resp, status = handler.run()
+            geocode_args, _ = self.mock_ctx.geocode.reverse_geocode.call_args
+            (location,), _ = self.mock_ctx.db.session.add.call_args
+
+            self.assertTrue(resp['success'])
+            self.assertEqual(status, 201)
+            self.assertEqual(geocode_args, (1.0, 2.0))
+            self.assertEqual(location.user, 'user')
+            self.assertEqual(location.device, 'device')
+            self.assertEqual(location.latitude, 1.0)
+            self.assertEqual(location.longitude, 2.0)
+            self.assertIsNone(location.address)
 
     def test_cmd_report_location(self):
         mock_data = {

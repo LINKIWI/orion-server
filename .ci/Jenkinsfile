@@ -6,25 +6,46 @@ pipeline {
         }
     }
 
+    options {
+        withAWS(endpointUrl: 'https://storage.kevinlin.info', credentials: 'storage-internal')
+    }
+
     stages {
         stage('Install') {
             steps {
-                sh 'sudo make bootstrap'
+                sh 'virtualenv --always-copy env'
+                sh '. env/bin/activate && make bootstrap'
             }
         }
         stage('Test') {
             parallel {
                 stage('Lint') {
                     steps {
-                        sh 'make lint'
+                        sh '. env/bin/activate && make lint'
                     }
                 }
                 stage('Unit') {
                     steps {
-                        sh 'make test'
+                        sh '. env/bin/activate && make test'
                     }
                 }
             }
+        }
+        stage('Release') {
+            steps {
+                sh 'virtualenv --relocatable env'
+                sh 'tar -czf release.tar.gz *'
+            }
+        }
+    }
+
+    post {
+        success {
+            s3Upload(
+                bucket: 'internal',
+                path: "deploy/${env.JOB_NAME}/${env.GIT_COMMIT}/",
+                file: 'release.tar.gz',
+            )
         }
     }
 }
