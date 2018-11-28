@@ -30,30 +30,35 @@ class LocationsHandler(BaseHandler):
 
     @require_params('user', 'device')
     def run(self, *args, **kwargs):
+        user = self.data['user']
+        device = self.data['device']
         offset = self.data.get('offset', 0)
         limit = self.data.get('limit', 10)
         timestamp_start = self.data.get('timestamp_start', int(time.time()) - NUM_SEC_MONTH)
         timestamp_end = self.data.get('timestamp_end', int(time.time()))
         fields = self.data.get('fields', [])
 
-        locations = self.ctx.db.session.query(Location).filter_by(
-            user=self.data['user'],
-            device=self.data['device'],
-        ).filter(
-            # Only enforce filtering parameters if explicitly specified by the client.
-            and_(
-                not timestamp_start or Location.timestamp > timestamp_start,
-                not timestamp_end or Location.timestamp < timestamp_end,
-            )
-        ).offset(
-            offset
-        ).limit(
-            limit
-        ).all()
+        with self.ctx.metrics_latency.profile('db.read_ms'):
+            locations = self.ctx.db.session.query(Location).filter_by(
+                user=user,
+                device=device,
+            ).filter(
+                # Only enforce filtering parameters if explicitly specified by the client.
+                and_(
+                    not timestamp_start or Location.timestamp > timestamp_start,
+                    not timestamp_end or Location.timestamp < timestamp_end,
+                )
+            ).offset(
+                offset
+            ).limit(
+                limit
+            ).all()
 
         serialized_locations = [
             location.serialize(fields)
             for location in locations
         ]
+
+        self.ctx.metrics_event.emit_event('query_locations', {'user': user, 'device': device})
 
         return self.success(data=serialized_locations, status=200)

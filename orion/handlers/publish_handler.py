@@ -1,9 +1,52 @@
-import json
+import functools
 
 from flask import request
 
 from orion.handlers.base_handler import BaseHandler
 from orion.models.location import Location
+
+
+def cached_reverse_geocode(func):
+    """
+    Decorator abstracting cache read and write semantics for the reverse geocoding method. The
+    wrapper function serves the cached value if available, but otherwise calls the wrapped function
+    and sets its return value in the cache.
+
+    :param func: Reverse geocoding method to wrap. Takes three arguments: self, lat, lon.
+    :return: Wrapper function with the same API.
+    """
+    @functools.wraps(func)
+    def cache_frontend_func(self, lat, lon):
+        def approx_coord(coord):
+            # Reduce the precision of the coordinate for purposes of the cache key, in an effort to
+            # approximately cluster coordinates within a small area to the same reverse-geocoded
+            # address. This helps reduce API QPS to Mapbox, since coordinates within a few meters
+            # of one another will likely resolve to the same address anyway.
+            return int(round(coord / 10e-7))
+
+        cache = self.ctx.cache.rw_client(
+            namespace='reverse-geocode',
+            key='feature-place-name',
+            tags={'lat': approx_coord(lat), 'lon': approx_coord(lon)},
+        )
+
+        self.ctx.metrics_event.emit_event('geocode.attempt')
+
+        # Cache hit; bypass the wrapped function and return the cached value as-is
+        cached_value = cache.get()
+        if cached_value is not None:
+            self.ctx.metrics_event.emit_event('geocode.cache_hit')
+            return cached_value
+
+        # Cache miss; invoke the wrapped function and cache its return value if non-null
+        self.ctx.metrics_event.emit_event('geocode.cache_miss')
+        value = func(self, lat, lon)
+        if value is not None:
+            cache.set(value, ttl=24 * 60 * 60 * 1000)  # 24 hour cache TTL
+
+        return value
+
+    return cache_frontend_func
 
 
 class PublishHandler(BaseHandler):
@@ -55,13 +98,17 @@ class PublishHandler(BaseHandler):
             address=address,
         )
 
-        self.ctx.db.session.add(location)
-        self.ctx.db.session.commit()
+        with self.ctx.metrics_latency.profile('db.write_ms'):
+            self.ctx.db.session.add(location)
+            self.ctx.db.session.commit()
 
         self.ctx.stream.emit_location(location)
 
+        self.ctx.metrics_event.emit_event('publish_location', {'user': user, 'device': device})
+
         return self.success(status=201)
 
+    @cached_reverse_geocode
     def _extract_address(self, lat, lon):
         """
         Extract a reverse geocoded address from a (latitude, longitude) coordinate, fronted by a
@@ -71,26 +118,10 @@ class PublishHandler(BaseHandler):
         :param lon: Longitude of the coordinate.
         :return: String representation of the coordinate's address.
         """
-        def approx_coord(coord):
-            # Reduce the precision of the coordinate for purposes of the cache key, in an effort to
-            # approximately cluster coordinates within a small area to the same reverse-geocoded
-            # address. This helps reduce API QPS to Mapbox, since coordinates within a few meters
-            # of one another will likely resolve to the same address anyway.
-            return int(round(coord / 10e-7))
+        self.ctx.metrics_event.emit_event('geocode.api_request')
+        feature = self.ctx.geocode.reverse_geocode(lat, lon)
+        if not feature:
+            self.ctx.metrics_event.emit_event('geocode.api_failure')
+            return
 
-        cache = self.ctx.cache.rw_client(
-            namespace='publish',
-            key='reverse-geocode-feature',
-            tags={'lat': approx_coord(lat), 'lon': approx_coord(lon)},
-        )
-
-        cached_feature = cache.get()
-        if cached_feature is None:
-            feature = self.ctx.geocode.reverse_geocode(lat, lon)
-            if not feature:
-                return
-
-            cache.set(json.dumps(feature), ttl=24 * 60 * 60 * 1000)  # 24 hour cache TTL
-            return self._extract_address(lat, lon)
-
-        return json.loads(cached_feature).get('place_name')
+        return feature.get('place_name')

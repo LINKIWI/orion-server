@@ -25,4 +25,6 @@ class UsersHandler(BaseHandler):
             for user, devices in user_devices.iteritems()
         ]
 
+        self.ctx.metrics_event.emit_event('query_users')
+
         return self.success(data=formatted_user_devices, status=200)

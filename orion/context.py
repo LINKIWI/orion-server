@@ -2,6 +2,8 @@ from orion.clients.cache import CacheClient
 from orion.clients.config import ConfigClient
 from orion.clients.db import DbClient
 from orion.clients.geocode import ReverseGeocodingClient
+from orion.clients.metrics import EventMetricsClient
+from orion.clients.metrics import LatencyMetricsClient
 from orion.clients.stream import StreamClient
 
 
@@ -31,6 +33,14 @@ class Context(object):
         )
         self.geocode = ReverseGeocodingClient(
             mapbox_access_token=self.config.get_value('mapbox_access_token'),
+        )
+        self.metrics_event = EventMetricsClient(
+            addr=self.config.get_value('statsd.addr'),
+            prefix='orion',
+        )
+        self.metrics_latency = LatencyMetricsClient(
+            addr=self.config.get_value('statsd.addr'),
+            prefix='orion',
         )
         self.stream = StreamClient(
             kafka_addr=self.config.get_value('kafka.addr'),
