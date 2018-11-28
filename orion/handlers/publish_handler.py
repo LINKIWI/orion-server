@@ -22,7 +22,7 @@ def cached_reverse_geocode(func):
             # approximately cluster coordinates within a small area to the same reverse-geocoded
             # address. This helps reduce API QPS to Mapbox, since coordinates within a few meters
             # of one another will likely resolve to the same address anyway.
-            return int(round(coord / 10e-7))
+            return int(round(coord / 10e-6))
 
         cache = self.ctx.cache.rw_client(
             namespace='reverse-geocode',
