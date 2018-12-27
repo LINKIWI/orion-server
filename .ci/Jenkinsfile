@@ -7,7 +7,10 @@ pipeline {
     }
 
     options {
-        withAWS(endpointUrl: 'https://storage.kevinlin.info', credentials: 'storage-internal')
+        withAWS(
+            endpointUrl: 'https://storage.kevinlin.info',
+            credentials: 'storage-internal',
+        )
     }
 
     stages {
@@ -35,17 +38,12 @@ pipeline {
             steps {
                 sh 'virtualenv --relocatable env'
                 sh 'tar -czf release.tar.gz *'
+                s3Upload(
+                    bucket: 'internal',
+                    path: "deploy/${env.JOB_NAME}/${env.GIT_COMMIT}/",
+                    file: 'release.tar.gz',
+                )
             }
-        }
-    }
-
-    post {
-        success {
-            s3Upload(
-                bucket: 'internal',
-                path: "deploy/${env.JOB_NAME}/${env.GIT_COMMIT}/",
-                file: 'release.tar.gz',
-            )
         }
     }
 }
